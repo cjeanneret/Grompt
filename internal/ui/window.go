@@ -139,6 +139,22 @@ func Run() error {
 		OnSpeedDown: func() {
 			controls.SetSpeed(engine.SpeedDown())
 		},
+		OnFontSizeUp: func() {
+			controls.SetFontSize(typographyTheme.IncreaseBodySize())
+			a.Settings().SetTheme(typographyTheme)
+			if scroll.Content != nil {
+				scroll.Content.Refresh()
+			}
+			scroll.Refresh()
+		},
+		OnFontSizeDown: func() {
+			controls.SetFontSize(typographyTheme.DecreaseBodySize())
+			a.Settings().SetTheme(typographyTheme)
+			if scroll.Content != nil {
+				scroll.Content.Refresh()
+			}
+			scroll.Refresh()
+		},
 	})
 
 	w.SetContent(container.NewBorder(controls.View(), nil, nil, nil, scroll))

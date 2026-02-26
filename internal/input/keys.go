@@ -6,6 +6,8 @@ type KeyActions struct {
 	OnTogglePlayPause func()
 	OnSpeedUp         func()
 	OnSpeedDown       func()
+	OnFontSizeUp      func()
+	OnFontSizeDown    func()
 }
 
 func BindTeleprompterKeys(canvas fyne.Canvas, actions KeyActions) {
@@ -22,6 +24,14 @@ func BindTeleprompterKeys(canvas fyne.Canvas, actions KeyActions) {
 		case fyne.KeyDown:
 			if actions.OnSpeedDown != nil {
 				actions.OnSpeedDown()
+			}
+		case fyne.KeyPlus, fyne.KeyEqual:
+			if actions.OnFontSizeUp != nil {
+				actions.OnFontSizeUp()
+			}
+		case fyne.KeyMinus:
+			if actions.OnFontSizeDown != nil {
+				actions.OnFontSizeDown()
 			}
 		}
 	})
