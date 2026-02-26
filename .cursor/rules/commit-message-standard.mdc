@@ -1,0 +1,42 @@
+---
+description: Standardize commit messages and AI disclosure
+alwaysApply: true
+---
+
+# Commit Message Standard
+
+Use Conventional Commits and this structure:
+
+1. Subject line:
+- Format: `<type>: <summary>`
+- Types: `feat`, `fix`, `docs`, `refactor`, `test`, `chore`, `ci`
+- Max length: 50 characters
+- Imperative mood, no trailing period
+
+2. Blank line
+
+3. Body:
+- Explain why and impact, not only what changed
+- Wrap each line at 72 characters max
+
+4. Blank line
+
+5. AI disclosure footer (required):
+- `AI-Tool: Cursor`
+- `AI-Model: <model name used>`
+- `AI-Mode: <Agent|Plan|Ask|Debug>`
+
+6. Co-author trailer (required for AI-assisted commits):
+- Add a valid Git trailer in this exact format:
+- `Co-authored-by: Cursor <cursor@cursor.com>`
+
+Example:
+`ci: add release workflow`
+
+`Build and publish binaries on version tags to make releases`
+`repeatable and reduce manual packaging errors.`
+
+`AI-Tool: Cursor`
+`AI-Model: GPT-5.3-Codex`
+`AI-Mode: Agent`
+`Co-authored-by: Cursor <cursor@cursor.com>`
