@@ -111,6 +111,19 @@ func (e *Engine) SpeedDown() float64 {
 	return e.speed
 }
 
+func (e *Engine) SetSpeed(speed float64) float64 {
+	e.mu.Lock()
+	defer e.mu.Unlock()
+	if speed < e.min {
+		speed = e.min
+	}
+	if speed > e.max {
+		speed = e.max
+	}
+	e.speed = speed
+	return e.speed
+}
+
 func (e *Engine) Stop() {
 	e.ticker.Stop()
 	close(e.stopCh)
