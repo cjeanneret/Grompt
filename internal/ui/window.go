@@ -36,6 +36,9 @@ func Run() error {
 
 	scroll := container.NewScroll(initialContent)
 	scroll.SetMinSize(fyne.NewSize(640, 400))
+	scrollWithFade := NewScrollWithFade(scroll, func() float32 {
+		return estimatedLineHeight(typographyTheme.BodySize())
+	})
 
 	var engine *scrollengine.Engine
 	engine = scrollengine.NewEngine(func(delta float64) {
@@ -61,6 +64,25 @@ func Run() error {
 	defer engine.Stop()
 
 	var controls *Controls
+
+	applyFontSizeChange := func(size float32) {
+		controls.SetFontSize(size)
+		a.Settings().SetTheme(typographyTheme)
+		if scroll.Content != nil {
+			scroll.Content.Refresh()
+		}
+		scroll.Refresh()
+		scrollWithFade.Refresh()
+	}
+
+	increaseFontSize := func() {
+		applyFontSizeChange(typographyTheme.IncreaseBodySize())
+	}
+
+	decreaseFontSize := func() {
+		applyFontSizeChange(typographyTheme.DecreaseBodySize())
+	}
+
 	controls = NewControls(ControlActions{
 		OnOpen: func() {
 			fileDialog := dialog.NewFileOpen(func(reader fyne.URIReadCloser, err error) {
@@ -93,6 +115,7 @@ func Run() error {
 				scroll.Content = rendered
 				scroll.ScrollToOffset(fyne.Position{})
 				scroll.Refresh()
+				scrollWithFade.Refresh()
 				controls.SetFileName(filepath.Base(path))
 			}, w)
 
@@ -111,22 +134,8 @@ func Run() error {
 		OnSpeedDown: func() {
 			controls.SetSpeed(engine.SpeedDown())
 		},
-		OnFontSizeUp: func() {
-			controls.SetFontSize(typographyTheme.IncreaseBodySize())
-			a.Settings().SetTheme(typographyTheme)
-			if scroll.Content != nil {
-				scroll.Content.Refresh()
-			}
-			scroll.Refresh()
-		},
-		OnFontSizeDown: func() {
-			controls.SetFontSize(typographyTheme.DecreaseBodySize())
-			a.Settings().SetTheme(typographyTheme)
-			if scroll.Content != nil {
-				scroll.Content.Refresh()
-			}
-			scroll.Refresh()
-		},
+		OnFontSizeUp:   increaseFontSize,
+		OnFontSizeDown: decreaseFontSize,
 	}, engine.Speed(), typographyTheme.BodySize())
 
 	input.BindTeleprompterKeys(w.Canvas(), input.KeyActions{
@@ -139,25 +148,11 @@ func Run() error {
 		OnSpeedDown: func() {
 			controls.SetSpeed(engine.SpeedDown())
 		},
-		OnFontSizeUp: func() {
-			controls.SetFontSize(typographyTheme.IncreaseBodySize())
-			a.Settings().SetTheme(typographyTheme)
-			if scroll.Content != nil {
-				scroll.Content.Refresh()
-			}
-			scroll.Refresh()
-		},
-		OnFontSizeDown: func() {
-			controls.SetFontSize(typographyTheme.DecreaseBodySize())
-			a.Settings().SetTheme(typographyTheme)
-			if scroll.Content != nil {
-				scroll.Content.Refresh()
-			}
-			scroll.Refresh()
-		},
+		OnFontSizeUp:   increaseFontSize,
+		OnFontSizeDown: decreaseFontSize,
 	})
 
-	w.SetContent(container.NewBorder(controls.View(), nil, nil, nil, scroll))
+	w.SetContent(container.NewBorder(controls.View(), nil, nil, nil, scrollWithFade))
 	w.ShowAndRun()
 	return nil
 }
