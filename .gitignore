@@ -1,0 +1,20 @@
+.DS_Store
+
+# Go build artifacts
+bin/
+dist/
+build/
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+
+# Test artifacts
+*.test
+*.out
+coverage.out
+
+# Fyne and app metadata
+fyne-cross/
+tmp/
