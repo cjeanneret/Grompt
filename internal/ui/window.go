@@ -11,6 +11,7 @@ import (
 	"fyne.io/fyne/v2/storage"
 	"fyne.io/fyne/v2/widget"
 	"grompt/internal/content"
+	"grompt/internal/input"
 	scrollengine "grompt/internal/scroll"
 )
 
@@ -107,6 +108,18 @@ func Run() error {
 			controls.SetSpeed(engine.SpeedDown())
 		},
 	}, engine.Speed())
+
+	input.BindTeleprompterKeys(w.Canvas(), input.KeyActions{
+		OnTogglePlayPause: func() {
+			engine.Toggle()
+		},
+		OnSpeedUp: func() {
+			controls.SetSpeed(engine.SpeedUp())
+		},
+		OnSpeedDown: func() {
+			controls.SetSpeed(engine.SpeedDown())
+		},
+	})
 
 	w.SetContent(container.NewBorder(controls.View(), nil, nil, nil, scroll))
 	w.ShowAndRun()
