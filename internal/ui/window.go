@@ -1,13 +1,17 @@
 package ui
 
 import (
-	"fmt"
+	"errors"
+	"path/filepath"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/app"
 	"fyne.io/fyne/v2/container"
+	"fyne.io/fyne/v2/dialog"
 	"fyne.io/fyne/v2/layout"
+	"fyne.io/fyne/v2/storage"
 	"fyne.io/fyne/v2/widget"
+	"grompt/internal/content"
 )
 
 const (
@@ -22,14 +26,49 @@ func Run() error {
 	w := a.NewWindow(appName)
 	w.Resize(fyne.NewSize(defaultWidth, defaultHeight))
 
-	content := widget.NewRichTextFromMarkdown(initialMessage)
-	content.Wrapping = fyne.TextWrapWord
+	initialContent := widget.NewRichTextFromMarkdown(initialMessage)
+	initialContent.Wrapping = fyne.TextWrapWord
 
-	scroll := container.NewScroll(content)
+	scroll := container.NewScroll(initialContent)
 	scroll.SetMinSize(fyne.NewSize(640, 400))
+	statusLabel := widget.NewLabel("No file loaded")
 
 	openButton := widget.NewButton("Open", func() {
-		fmt.Println("Open action will be implemented in next step.")
+		fileDialog := dialog.NewFileOpen(func(reader fyne.URIReadCloser, err error) {
+			if err != nil {
+				dialog.ShowError(err, w)
+				return
+			}
+			if reader == nil {
+				return
+			}
+			defer reader.Close()
+
+			path := reader.URI().Path()
+			data, format, loadErr := content.LoadFromPath(path)
+			if loadErr != nil {
+				if errors.Is(loadErr, content.ErrUnsupportedFileType) {
+					dialog.ShowInformation("Unsupported file", "Supported extensions are .md, .markdown, .html and .htm.", w)
+					return
+				}
+				dialog.ShowError(loadErr, w)
+				return
+			}
+
+			rendered, renderErr := content.Render(data, format)
+			if renderErr != nil {
+				dialog.ShowError(renderErr, w)
+				return
+			}
+
+			scroll.Content = rendered
+			scroll.Offset = fyne.Position{}
+			scroll.Refresh()
+			statusLabel.SetText(filepath.Base(path))
+		}, w)
+
+		fileDialog.SetFilter(storage.NewExtensionFileFilter([]string{".md", ".markdown", ".html", ".htm"}))
+		fileDialog.Show()
 	})
 	playButton := widget.NewButton("Play", nil)
 	pauseButton := widget.NewButton("Pause", nil)
@@ -38,6 +77,8 @@ func Run() error {
 
 	controls := container.NewHBox(
 		openButton,
+		layout.NewSpacer(),
+		statusLabel,
 		layout.NewSpacer(),
 		playButton,
 		pauseButton,
