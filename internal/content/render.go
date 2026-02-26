@@ -25,6 +25,7 @@ func Render(data []byte, format Format) (fyne.CanvasObject, error) {
 func renderMarkdown(markdown string) *widget.RichText {
 	richText := widget.NewRichTextFromMarkdown(markdown)
 	richText.Wrapping = fyne.TextWrapWord
+	ApplyTypography(richText)
 	return richText
 }
 
@@ -39,6 +40,7 @@ func renderHTML(rawHTML string) (fyne.CanvasObject, error) {
 
 	richText := widget.NewRichText(ctx.segments...)
 	richText.Wrapping = fyne.TextWrapWord
+	ApplyTypography(richText)
 	return richText, nil
 }
 
@@ -190,7 +192,8 @@ func appendRawText(ctx *renderContext, text string, style textStyle) {
 	ctx.segments = append(ctx.segments, &widget.TextSegment{
 		Text: text,
 		Style: widget.RichTextStyle{
-			Inline: true,
+			Inline:   true,
+			SizeName: ThemeSizeContentBody,
 			TextStyle: fyne.TextStyle{
 				Bold:      style.bold,
 				Italic:    style.italic,

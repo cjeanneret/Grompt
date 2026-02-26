@@ -24,11 +24,15 @@ const (
 
 func Run() error {
 	a := app.NewWithID("com.grompt.app")
+	typographyTheme := NewTypographyTheme(DefaultContentFontSize)
+	a.Settings().SetTheme(typographyTheme)
+
 	w := a.NewWindow(appName)
 	w.Resize(fyne.NewSize(defaultWidth, defaultHeight))
 
 	initialContent := widget.NewRichTextFromMarkdown(initialMessage)
 	initialContent.Wrapping = fyne.TextWrapWord
+	content.ApplyTypography(initialContent)
 
 	scroll := container.NewScroll(initialContent)
 	scroll.SetMinSize(fyne.NewSize(640, 400))
@@ -107,7 +111,23 @@ func Run() error {
 		OnSpeedDown: func() {
 			controls.SetSpeed(engine.SpeedDown())
 		},
-	}, engine.Speed())
+		OnFontSizeUp: func() {
+			controls.SetFontSize(typographyTheme.IncreaseBodySize())
+			a.Settings().SetTheme(typographyTheme)
+			if scroll.Content != nil {
+				scroll.Content.Refresh()
+			}
+			scroll.Refresh()
+		},
+		OnFontSizeDown: func() {
+			controls.SetFontSize(typographyTheme.DecreaseBodySize())
+			a.Settings().SetTheme(typographyTheme)
+			if scroll.Content != nil {
+				scroll.Content.Refresh()
+			}
+			scroll.Refresh()
+		},
+	}, engine.Speed(), typographyTheme.BodySize())
 
 	input.BindTeleprompterKeys(w.Canvas(), input.KeyActions{
 		OnTogglePlayPause: func() {
