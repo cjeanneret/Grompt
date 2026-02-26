@@ -12,6 +12,7 @@ import (
 	"fyne.io/fyne/v2/dialog"
 	"fyne.io/fyne/v2/storage"
 	"fyne.io/fyne/v2/widget"
+	"grompt/assets"
 	appconfig "grompt/internal/config"
 	"grompt/internal/content"
 	"grompt/internal/input"
@@ -78,6 +79,7 @@ func Run() error {
 	}
 
 	a := app.NewWithID("com.grompt.app")
+	a.SetIcon(assets.AppIconResource())
 	typographyTheme := NewTypographyTheme(initialFontSize)
 	a.Settings().SetTheme(typographyTheme)
 
