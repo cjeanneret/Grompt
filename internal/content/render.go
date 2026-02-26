@@ -12,24 +12,32 @@ import (
 )
 
 func Render(data []byte, format Format) (fyne.CanvasObject, error) {
+	return RenderWithOptions(data, format, DefaultRenderOptions())
+}
+
+func RenderWithOptions(data []byte, format Format, options RenderOptions) (fyne.CanvasObject, error) {
+	normalizedOptions := options
+	normalizedOptions.WordSpacing = NormalizeWordSpacing(options.WordSpacing)
+
 	switch format {
 	case FormatMarkdown:
-		return renderMarkdown(string(data)), nil
+		return renderMarkdown(string(data), normalizedOptions), nil
 	case FormatHTML:
-		return renderHTML(string(data))
+		return renderHTML(string(data), normalizedOptions)
 	default:
 		return nil, fmt.Errorf("unsupported render format: %s", format)
 	}
 }
 
-func renderMarkdown(markdown string) *widget.RichText {
+func renderMarkdown(markdown string, options RenderOptions) *widget.RichText {
 	richText := widget.NewRichTextFromMarkdown(markdown)
 	richText.Wrapping = fyne.TextWrapWord
 	ApplyTypography(richText)
+	ApplyWordSpacing(richText, options.WordSpacing)
 	return richText
 }
 
-func renderHTML(rawHTML string) (fyne.CanvasObject, error) {
+func renderHTML(rawHTML string, options RenderOptions) (fyne.CanvasObject, error) {
 	doc, err := html.Parse(strings.NewReader(rawHTML))
 	if err != nil {
 		return nil, fmt.Errorf("parse html: %w", err)
@@ -41,6 +49,7 @@ func renderHTML(rawHTML string) (fyne.CanvasObject, error) {
 	richText := widget.NewRichText(ctx.segments...)
 	richText.Wrapping = fyne.TextWrapWord
 	ApplyTypography(richText)
+	ApplyWordSpacing(richText, options.WordSpacing)
 	return richText, nil
 }
 
