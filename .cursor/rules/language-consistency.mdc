@@ -1,0 +1,14 @@
+---
+description: Enforce English in assistant outputs
+alwaysApply: true
+---
+
+# Language Consistency
+
+- Write all assistant-facing content in English.
+- Keep a professional, concise engineering tone.
+- Keep command names, file paths, and code identifiers in monospace.
+
+## If language drifts
+
+- Rewrite the final answer in English before sending.
