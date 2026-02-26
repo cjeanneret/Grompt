@@ -9,7 +9,7 @@ const (
 	DefaultMinSpeed = 20.0
 	DefaultMaxSpeed = 300.0
 	DefaultStep     = 20.0
-	DefaultSpeed    = 80.0
+	DefaultSpeed    = 20.0
 	DefaultTickRate = 33 * time.Millisecond
 )
 

@@ -9,7 +9,11 @@ import (
 	"fyne.io/fyne/v2/theme"
 )
 
-const clearReadingLines = float32(2.5)
+const (
+	clearReadingLines = float32(3)
+	chevronLineHeight = float32(3)
+	minSideGutter     = float32(40)
+)
 
 type scrollFadeLayout struct {
 	clearLines         float32
@@ -20,11 +24,13 @@ func NewScrollWithFade(scroll *container.Scroll, lineHeightProvider func() float
 	background := color.NRGBAModel.Convert(theme.Color(theme.ColorNameBackground)).(color.NRGBA)
 	topGradient := canvas.NewVerticalGradient(withAlpha(background, 230), withAlpha(background, 0))
 	bottomGradient := canvas.NewVerticalGradient(withAlpha(background, 0), withAlpha(background, 230))
+	leftChevron := canvas.NewText(">", withThemeAlpha(theme.Color(theme.ColorNameForeground), 220))
+	rightChevron := canvas.NewText("<", withThemeAlpha(theme.Color(theme.ColorNameForeground), 220))
 
 	return container.New(&scrollFadeLayout{
 		clearLines:         clearReadingLines,
 		lineHeightProvider: lineHeightProvider,
-	}, scroll, topGradient, bottomGradient)
+	}, scroll, topGradient, bottomGradient, leftChevron, rightChevron)
 }
 
 func (l *scrollFadeLayout) Layout(objects []fyne.CanvasObject, size fyne.Size) {
@@ -33,12 +39,6 @@ func (l *scrollFadeLayout) Layout(objects []fyne.CanvasObject, size fyne.Size) {
 	}
 
 	scroll := objects[0]
-	scroll.Move(fyne.Position{})
-	scroll.Resize(size)
-
-	if len(objects) < 3 {
-		return
-	}
 
 	lineHeight := float32(1)
 	if l.lineHeightProvider != nil {
@@ -56,14 +56,71 @@ func (l *scrollFadeLayout) Layout(objects []fyne.CanvasObject, size fyne.Size) {
 		fadeHeight = 0
 	}
 
+	chevronSize := lineHeight * chevronLineHeight
+	if chevronSize < 16 {
+		chevronSize = 16
+	}
+
+	sideGutter := chevronSize*0.95 + minSideGutter
+	maxGutter := (size.Width - 120) / 2
+	if maxGutter < minSideGutter {
+		maxGutter = minSideGutter
+	}
+	if sideGutter > maxGutter {
+		sideGutter = maxGutter
+	}
+	if sideGutter < minSideGutter {
+		sideGutter = minSideGutter
+	}
+
+	scrollX := sideGutter
+	scrollWidth := size.Width - (2 * sideGutter)
+	if scrollWidth < 120 {
+		scrollWidth = 120
+		scrollX = (size.Width - scrollWidth) / 2
+		if scrollX < 0 {
+			scrollX = 0
+			scrollWidth = size.Width
+		}
+	}
+
+	scroll.Move(fyne.NewPos(scrollX, 0))
+	scroll.Resize(fyne.NewSize(scrollWidth, size.Height))
+
+	if len(objects) < 3 {
+		return
+	}
+
 	topGradient := objects[1]
 	bottomGradient := objects[2]
 
-	topGradient.Move(fyne.NewPos(0, 0))
-	topGradient.Resize(fyne.NewSize(size.Width, fadeHeight))
+	topGradient.Move(fyne.NewPos(scrollX, 0))
+	topGradient.Resize(fyne.NewSize(scrollWidth, fadeHeight))
 
-	bottomGradient.Move(fyne.NewPos(0, size.Height-fadeHeight))
-	bottomGradient.Resize(fyne.NewSize(size.Width, fadeHeight))
+	bottomGradient.Move(fyne.NewPos(scrollX, size.Height-fadeHeight))
+	bottomGradient.Resize(fyne.NewSize(scrollWidth, fadeHeight))
+
+	if len(objects) < 5 {
+		return
+	}
+
+	centerY := fadeHeight + (clearBandHeight / 2)
+
+	leftChevron, ok := objects[3].(*canvas.Text)
+	if ok {
+		leftChevron.TextSize = chevronSize
+		leftChevron.Refresh()
+		leftSize := leftChevron.MinSize()
+		leftChevron.Move(fyne.NewPos(scrollX-leftSize.Width-20, centerY-(leftSize.Height/2)))
+	}
+
+	rightChevron, ok := objects[4].(*canvas.Text)
+	if ok {
+		rightChevron.TextSize = chevronSize
+		rightChevron.Refresh()
+		rightSize := rightChevron.MinSize()
+		rightChevron.Move(fyne.NewPos(scrollX+scrollWidth+20, centerY-(rightSize.Height/2)))
+	}
 }
 
 func (l *scrollFadeLayout) MinSize(objects []fyne.CanvasObject) fyne.Size {
@@ -76,4 +133,10 @@ func (l *scrollFadeLayout) MinSize(objects []fyne.CanvasObject) fyne.Size {
 func withAlpha(c color.NRGBA, alpha uint8) color.NRGBA {
 	c.A = alpha
 	return c
+}
+
+func withThemeAlpha(c color.Color, alpha uint8) color.NRGBA {
+	converted := color.NRGBAModel.Convert(c).(color.NRGBA)
+	converted.A = alpha
+	return converted
 }

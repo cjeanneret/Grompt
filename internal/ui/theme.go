@@ -10,7 +10,7 @@ import (
 )
 
 const (
-	DefaultContentFontSize float32 = 30
+	DefaultContentFontSize float32 = 38
 	MinContentFontSize     float32 = 16
 	MaxContentFontSize     float32 = 96
 	ContentFontStep        float32 = 2
@@ -80,7 +80,7 @@ func (t *TypographyTheme) DecreaseBodySize() float32 {
 }
 
 func estimatedLineHeight(fontSize float32) float32 {
-	return fontSize * 1.35
+	return fontSize + theme.DefaultTheme().Size(theme.SizeNameLineSpacing)
 }
 
 func clampFontSize(size float32) float32 {
