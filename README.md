@@ -1,5 +1,7 @@
 # grompt
 
+[![CI](https://github.com/cjeanneret/Grompt/actions/workflows/pr-tests.yml/badge.svg?branch=main)](https://github.com/cjeanneret/Grompt/actions/workflows/pr-tests.yml)
+
 `grompt` is a desktop teleprompter app written in Go, using `Fyne` for the UI.
 It loads Markdown or HTML files and displays them in a reading-friendly view with auto-scroll controls.
 
@@ -28,6 +30,18 @@ go run cmd/grompt/main.go
 
 ```bash
 go build -o bin/grompt cmd/grompt/main.go
+```
+
+## Release Process
+
+Releases are automated through GitHub Actions on tags matching `v*`.
+When a new tag is pushed, GitHub builds and publishes binaries for Linux, macOS, and Windows.
+
+```bash
+git checkout main
+git pull --ff-only origin main
+git tag -a v0.0.1 -m "v0.0.1"
+git push origin v0.0.1
 ```
 
 ## Usage
