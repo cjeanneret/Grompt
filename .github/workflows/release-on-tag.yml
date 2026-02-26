@@ -1,0 +1,73 @@
+name: Release On Tag
+
+on:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    name: Build and publish binaries
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+          cache: true
+
+      - name: Install fyne-cross
+        run: go install github.com/fyne-io/fyne-cross@latest
+
+      - name: Build binaries (linux, darwin, windows)
+        run: |
+          "$(go env GOPATH)/bin/fyne-cross" linux -arch=amd64,arm64 -output grompt ./cmd/grompt
+          "$(go env GOPATH)/bin/fyne-cross" darwin -arch=amd64,arm64 -output grompt ./cmd/grompt
+          "$(go env GOPATH)/bin/fyne-cross" windows -arch=amd64 -output grompt ./cmd/grompt
+
+      - name: Collect release assets
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p release-assets
+
+          collect_binary() {
+            local os="$1"
+            local arch="$2"
+            local output_name="$3"
+            local base="fyne-cross/dist/${os}-${arch}"
+            local destination="release-assets/${output_name}"
+            local candidates=(
+              "${base}/grompt"
+              "${base}/grompt.exe"
+              "${base}/grompt.app/Contents/MacOS/grompt"
+            )
+
+            for candidate in "${candidates[@]}"; do
+              if [[ -f "${candidate}" ]]; then
+                cp "${candidate}" "${destination}"
+                return 0
+              fi
+            done
+
+            echo "No binary found for ${os}/${arch} in ${base}" >&2
+            ls -R "${base}" || true
+            return 1
+          }
+
+          collect_binary linux amd64 grompt_linux_amd64
+          collect_binary linux arm64 grompt_linux_arm64
+          collect_binary darwin amd64 grompt_darwin_amd64
+          collect_binary darwin arm64 grompt_darwin_arm64
+          collect_binary windows amd64 grompt_windows_amd64.exe
+
+      - name: Create GitHub Release and upload assets
+        uses: softprops/action-gh-release@v2
+        with:
+          files: release-assets/*
