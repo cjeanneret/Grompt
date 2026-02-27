@@ -39,33 +39,9 @@ jobs:
         run: |
           set -euo pipefail
           mkdir -p release-assets
-
-          collect_binary() {
-            local os="$1"
-            local arch="$2"
-            local output_name="$3"
-            local base="fyne-cross/dist/${os}-${arch}"
-            local destination="release-assets/${output_name}"
-            local candidates=(
-              "${base}/grompt"
-              "${base}/grompt.exe"
-            )
-
-            for candidate in "${candidates[@]}"; do
-              if [[ -f "${candidate}" ]]; then
-                cp "${candidate}" "${destination}"
-                return 0
-              fi
-            done
-
-            echo "No binary found for ${os}/${arch} in ${base}" >&2
-            ls -R "${base}" || true
-            return 1
-          }
-
-          collect_binary linux amd64 grompt_linux_amd64
-          collect_binary linux arm64 grompt_linux_arm64
-          collect_binary windows amd64 grompt_windows_amd64.exe
+          cp "fyne-cross/dist/linux-amd64/grompt.tar.xz" "release-assets/grompt_linux_amd64.tar.xz"
+          cp "fyne-cross/dist/linux-arm64/grompt.tar.xz" "release-assets/grompt_linux_arm64.tar.xz"
+          cp "fyne-cross/dist/windows-amd64/grompt.zip" "release-assets/grompt_windows_amd64.zip"
 
       - name: Upload linux/windows artifacts
         uses: actions/upload-artifact@v4
@@ -95,9 +71,23 @@ jobs:
 
       - name: Build binaries (darwin)
         run: |
-          FYNE_CROSS="$(go env GOPATH)/bin/fyne-cross"
+          FYNE="$(go env GOPATH)/bin/fyne"
           APP_ID="com.grompt.app"
-          "${FYNE_CROSS}" darwin -local -env=GOTOOLCHAIN=local -app-id "${APP_ID}" -arch=amd64,arm64 -output grompt -icon assets/icons/logo-1024.png ./cmd/grompt
+          mkdir -p fyne-cross/dist/darwin-amd64 fyne-cross/dist/darwin-arm64
+
+          (
+            cd cmd/grompt
+            GOARCH=amd64 "${FYNE}" package --appID "${APP_ID}" --icon ../../assets/icons/logo-1024.png --name grompt
+          )
+          rm -rf fyne-cross/dist/darwin-amd64/grompt.app
+          cp -R cmd/grompt/grompt.app fyne-cross/dist/darwin-amd64/grompt.app
+
+          (
+            cd cmd/grompt
+            GOARCH=arm64 "${FYNE}" package --appID "${APP_ID}" --icon ../../assets/icons/logo-1024.png --name grompt
+          )
+          rm -rf fyne-cross/dist/darwin-arm64/grompt.app
+          cp -R cmd/grompt/grompt.app fyne-cross/dist/darwin-arm64/grompt.app
 
       - name: Collect release assets
         shell: bash
