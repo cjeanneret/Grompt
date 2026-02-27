@@ -27,9 +27,10 @@ jobs:
 
       - name: Build binaries (linux, darwin, windows)
         run: |
-          "$(go env GOPATH)/bin/fyne-cross" linux -arch=amd64,arm64 -output grompt -icon assets/icons/logo-1024.png ./cmd/grompt
-          "$(go env GOPATH)/bin/fyne-cross" darwin -arch=amd64,arm64 -output grompt -icon assets/icons/logo-1024.png ./cmd/grompt
-          "$(go env GOPATH)/bin/fyne-cross" windows -arch=amd64 -output grompt -icon assets/icons/logo-1024.png ./cmd/grompt
+          FYNE_CROSS="$(go env GOPATH)/bin/fyne-cross"
+          "${FYNE_CROSS}" linux -pull -env=GOTOOLCHAIN=auto -arch=amd64,arm64 -output grompt -icon assets/icons/logo-1024.png ./cmd/grompt
+          "${FYNE_CROSS}" darwin -pull -env=GOTOOLCHAIN=auto -arch=amd64,arm64 -output grompt -icon assets/icons/logo-1024.png ./cmd/grompt
+          "${FYNE_CROSS}" windows -pull -env=GOTOOLCHAIN=auto -arch=amd64 -output grompt -icon assets/icons/logo-1024.png ./cmd/grompt
 
       - name: Collect release assets
         shell: bash
