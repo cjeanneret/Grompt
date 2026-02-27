@@ -2,7 +2,8 @@
 
 # Go build artifacts
 /main
-bin/
+bin/*
+!bin/.keep
 dist/
 build/
 *.exe
