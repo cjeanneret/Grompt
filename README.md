@@ -2,6 +2,8 @@
 
 [![CI](https://github.com/cjeanneret/Grompt/actions/workflows/pr-tests.yml/badge.svg?branch=main)](https://github.com/cjeanneret/Grompt/actions/workflows/pr-tests.yml)
 
+![grompt logo](assets/icons/logo-512.png)
+
 `grompt` is a desktop teleprompter app written in Go, using `Fyne` for the UI.
 It loads Markdown or HTML files and displays them in a reading-friendly view with auto-scroll controls.
 
@@ -31,6 +33,26 @@ go run cmd/grompt/main.go
 ```bash
 go build -o bin/grompt cmd/grompt/main.go
 ```
+
+## App Icon Assets
+
+The source logo is `assets/icons/logo.png`.
+Generate transparent, content-cropped icon assets with:
+
+```bash
+go run ./cmd/logoassets
+```
+
+Generated files are written to `assets/icons`:
+
+- `logo-clean.png` (transparent, cropped, square source for resizing)
+- `logo-16.png`
+- `logo-32.png`
+- `logo-64.png`
+- `logo-128.png`
+- `logo-256.png`
+- `logo-512.png`
+- `logo-1024.png`
 
 ## Release Process
 
