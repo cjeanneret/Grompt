@@ -6,6 +6,7 @@ import (
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/layout"
+	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
 )
 
@@ -28,7 +29,7 @@ func NewControls(actions ControlActions, initialSpeed float64) *Controls {
 	fileLabel := widget.NewLabel("No file loaded")
 	speedLabel := widget.NewLabel(formatSpeed(initialSpeed))
 
-	settingsButton := widget.NewButton("Settings", actions.OnSettings)
+	settingsButton := widget.NewButtonWithIcon("", theme.MenuIcon(), actions.OnSettings)
 	playButton := widget.NewButton("Play", actions.OnPlay)
 	pauseButton := widget.NewButton("Pause", actions.OnPause)
 	speedUpButton := widget.NewButton("Speed +", actions.OnSpeedUp)
