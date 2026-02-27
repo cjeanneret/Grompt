@@ -31,7 +31,13 @@ go run cmd/grompt/main.go
 ## Build
 
 ```bash
-go build -o bin/grompt cmd/grompt/main.go
+mkdir -p bin
+podman run --rm \
+  --security-opt label=disable \
+  -v "$PWD:/workspace" \
+  -w /workspace \
+  golang:1.25-bookworm \
+  bash -lc 'export PATH="/usr/local/go/bin:${PATH}" && apt-get update && apt-get install -y pkg-config libgl1-mesa-dev xorg-dev && go build -o bin/grompt cmd/grompt/main.go'
 ```
 
 ## App Icon Assets
