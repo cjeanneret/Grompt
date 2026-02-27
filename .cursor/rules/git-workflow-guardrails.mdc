@@ -1,0 +1,22 @@
+---
+description: Enforce safe Git workflow before development
+alwaysApply: true
+---
+
+# Git Workflow Guardrails
+
+Follow this workflow for all Git operations:
+
+1. Keep `main` current before starting work:
+- Switch to `main`
+- Run `git pull --rebase`
+- Ensure local `main` is up to date before branching
+
+2. Always develop on a dedicated branch:
+- Never implement requested work directly on `main`
+- Create a branch for each targeted change before coding
+
+3. Ensure commits are signed:
+- Use signed commits for every commit (`git commit -S`)
+- If signing is not configured or fails, stop and ask the user
+  before proceeding with commits
