@@ -69,10 +69,11 @@ git push origin v0.0.1
 ## Usage
 
 1. Open the app
-2. Click `Settings` -> `Load file...`
+2. Click the burger menu icon -> `Load file...`
 3. Select a Markdown or HTML file
 4. Use `Play` / `Pause` and speed controls
-5. Adjust text size and word spacing from `Settings`
+5. Adjust text size and word spacing from `Menu`
+6. Use `Menu` -> `Exit` to close the app
 
 ## Keyboard Shortcuts
 

@@ -241,7 +241,7 @@ func Run() error {
 	}
 
 	showSettingsMenu := func() {
-		menu := fyne.NewMenu("Settings",
+		menu := fyne.NewMenu("Menu",
 			fyne.NewMenuItem("Load file...", openFile),
 			fyne.NewMenuItemSeparator(),
 			fyne.NewMenuItem(fmt.Sprintf("Text size + (%.0f pt)", typographyTheme.BodySize()), increaseFontSize),
@@ -252,6 +252,10 @@ func Run() error {
 			}),
 			fyne.NewMenuItem(fmt.Sprintf("Word spacing - (x%d)", wordSpacing), func() {
 				changeWordSpacing(wordSpacing - 1)
+			}),
+			fyne.NewMenuItemSeparator(),
+			fyne.NewMenuItem("Exit", func() {
+				a.Quit()
 			}),
 		)
 
