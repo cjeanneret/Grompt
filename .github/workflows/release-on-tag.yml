@@ -22,16 +22,19 @@ jobs:
           go-version-file: go.mod
           cache: true
 
-      - name: Install fyne-cross
-        run: go install github.com/fyne-io/fyne-cross@latest
+      - name: Install build tools
+        run: |
+          go install github.com/fyne-io/fyne-cross@v1.6.1
+          go install fyne.io/fyne/v2/cmd/fyne@v2.7.3
+          echo "$(go env GOPATH)/bin" >> "$GITHUB_PATH"
 
       - name: Build binaries (linux, darwin, windows)
         run: |
           FYNE_CROSS="$(go env GOPATH)/bin/fyne-cross"
           APP_ID="com.grompt.app"
-          "${FYNE_CROSS}" linux -pull -env=GOTOOLCHAIN=local -arch=amd64,arm64 -output grompt -icon assets/icons/logo-1024.png ./cmd/grompt
-          "${FYNE_CROSS}" darwin -pull -env=GOTOOLCHAIN=local -app-id "${APP_ID}" -arch=amd64,arm64 -output grompt -icon assets/icons/logo-1024.png ./cmd/grompt
-          "${FYNE_CROSS}" windows -pull -env=GOTOOLCHAIN=local -app-id "${APP_ID}" -arch=amd64 -output grompt -icon assets/icons/logo-1024.png ./cmd/grompt
+          "${FYNE_CROSS}" linux -pull -env=GOTOOLCHAIN=auto -arch=amd64,arm64 -output grompt -icon assets/icons/logo-1024.png ./cmd/grompt
+          "${FYNE_CROSS}" darwin -pull -env=GOTOOLCHAIN=auto -app-id "${APP_ID}" -arch=amd64,arm64 -output grompt -icon assets/icons/logo-1024.png ./cmd/grompt
+          "${FYNE_CROSS}" windows -pull -env=GOTOOLCHAIN=auto -app-id "${APP_ID}" -arch=amd64 -output grompt -icon assets/icons/logo-1024.png ./cmd/grompt
 
       - name: Collect release assets
         shell: bash
