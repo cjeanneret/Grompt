@@ -9,8 +9,8 @@ permissions:
   contents: write
 
 jobs:
-  release:
-    name: Build and publish binaries
+  build-linux-windows:
+    name: Build linux/windows binaries
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -25,16 +25,14 @@ jobs:
       - name: Install build tools
         run: |
           go install github.com/fyne-io/fyne-cross@v1.6.1
-          go install fyne.io/fyne/v2/cmd/fyne@v2.7.3
           echo "$(go env GOPATH)/bin" >> "$GITHUB_PATH"
 
-      - name: Build binaries (linux, darwin, windows)
+      - name: Build binaries (linux, windows)
         run: |
           FYNE_CROSS="$(go env GOPATH)/bin/fyne-cross"
           APP_ID="com.grompt.app"
-          "${FYNE_CROSS}" linux -pull -env=GOTOOLCHAIN=auto -arch=amd64,arm64 -output grompt -icon assets/icons/logo-1024.png ./cmd/grompt
-          "${FYNE_CROSS}" darwin -pull -env=GOTOOLCHAIN=auto -app-id "${APP_ID}" -arch=amd64,arm64 --macosx-sdk-path bundled -output grompt -icon assets/icons/logo-1024.png ./cmd/grompt
-          "${FYNE_CROSS}" windows -pull -env=GOTOOLCHAIN=auto -app-id "${APP_ID}" -arch=amd64 -output grompt -icon assets/icons/logo-1024.png ./cmd/grompt
+          "${FYNE_CROSS}" linux -pull -env=GOTOOLCHAIN=local -arch=amd64,arm64 -output grompt -icon assets/icons/logo-1024.png ./cmd/grompt
+          "${FYNE_CROSS}" windows -pull -env=GOTOOLCHAIN=local -app-id "${APP_ID}" -arch=amd64 -output grompt -icon assets/icons/logo-1024.png ./cmd/grompt
 
       - name: Collect release assets
         shell: bash
@@ -65,6 +63,48 @@ jobs:
             return 1
           }
 
+          collect_binary linux amd64 grompt_linux_amd64
+          collect_binary linux arm64 grompt_linux_arm64
+          collect_binary windows amd64 grompt_windows_amd64.exe
+
+      - name: Upload linux/windows artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-assets-linux-windows
+          path: release-assets/*
+          if-no-files-found: error
+
+  build-darwin:
+    name: Build macOS app bundles
+    runs-on: macos-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+          cache: true
+
+      - name: Install build tools
+        run: |
+          go install github.com/fyne-io/fyne-cross@v1.6.1
+          go install fyne.io/fyne/v2/cmd/fyne@v2.7.3
+          echo "$(go env GOPATH)/bin" >> "$GITHUB_PATH"
+
+      - name: Build binaries (darwin)
+        run: |
+          FYNE_CROSS="$(go env GOPATH)/bin/fyne-cross"
+          APP_ID="com.grompt.app"
+          "${FYNE_CROSS}" darwin -env=GOTOOLCHAIN=local -app-id "${APP_ID}" -arch=amd64,arm64 -output grompt -icon assets/icons/logo-1024.png ./cmd/grompt
+
+      - name: Collect release assets
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p release-assets
+
           collect_macos_app() {
             local arch="$1"
             local output_name="$2"
@@ -83,11 +123,34 @@ jobs:
             )
           }
 
-          collect_binary linux amd64 grompt_linux_amd64
-          collect_binary linux arm64 grompt_linux_arm64
           collect_macos_app amd64 grompt_darwin_amd64.app.zip
           collect_macos_app arm64 grompt_darwin_arm64.app.zip
-          collect_binary windows amd64 grompt_windows_amd64.exe
+
+      - name: Upload darwin artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-assets-darwin
+          path: release-assets/*
+          if-no-files-found: error
+
+  release:
+    name: Publish release
+    needs:
+      - build-linux-windows
+      - build-darwin
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download linux/windows artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: release-assets-linux-windows
+          path: release-assets
+
+      - name: Download darwin artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: release-assets-darwin
+          path: release-assets
 
       - name: Create GitHub Release and upload assets
         uses: softprops/action-gh-release@v2
