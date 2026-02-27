@@ -33,7 +33,7 @@ jobs:
           FYNE_CROSS="$(go env GOPATH)/bin/fyne-cross"
           APP_ID="com.grompt.app"
           "${FYNE_CROSS}" linux -pull -env=GOTOOLCHAIN=auto -arch=amd64,arm64 -output grompt -icon assets/icons/logo-1024.png ./cmd/grompt
-          "${FYNE_CROSS}" darwin -pull -env=GOTOOLCHAIN=auto -app-id "${APP_ID}" -arch=amd64,arm64 -output grompt -icon assets/icons/logo-1024.png ./cmd/grompt
+          "${FYNE_CROSS}" darwin -pull -env=GOTOOLCHAIN=auto -app-id "${APP_ID}" -arch=amd64,arm64 --macosx-sdk-path bundled -output grompt -icon assets/icons/logo-1024.png ./cmd/grompt
           "${FYNE_CROSS}" windows -pull -env=GOTOOLCHAIN=auto -app-id "${APP_ID}" -arch=amd64 -output grompt -icon assets/icons/logo-1024.png ./cmd/grompt
 
       - name: Collect release assets
